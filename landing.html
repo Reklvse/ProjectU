@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project U: Access Portal | Advocates For Change</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --c-primary-dark: #1A1A1A; /* Near Black */
+            --c-primary: #333333;     /* Dark Grey */
+            --c-secondary: #AAAAAA;   /* Light Grey */
+            --c-background: #F0F0F0;  /* Off-White/Light Grey */
+            --c-accent: #DAA520;      /* Goldenrod Gold */
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--c-background);
+            color: var(--c-primary-dark);
+        }
+        .portal-card {
+            background-color: white;
+            border-radius: 1.5rem; /* Slightly larger border radius */
+            padding: 2.5rem; /* Increased padding */
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08); /* Stronger initial shadow */
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+        }
+        .portal-card:hover {
+            transform: translateY(-8px); /* More pronounced lift */
+            box-shadow: 0 20px 50px rgba(0,0,0,0.15); /* More dramatic shadow */
+        }
+        .portal-link {
+            display: block;
+            text-align: center;
+            font-weight: 800; /* Extra bold */
+            padding: 1rem 0;
+            border-radius: 0.75rem;
+            color: var(--c-primary-dark);
+            background-color: var(--c-accent);
+            transition: background-color 0.2s, color 0.2s;
+        }
+        .portal-link:hover {
+            background-color: #C79200; /* Darker Gold on hover */
+            color: var(--c-primary-dark);
+        }
+        .icon-box {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 3.5rem;
+            height: 3.5rem;
+            border-radius: 0.5rem;
+            font-size: 2rem;
+            font-weight: 900;
+            margin-bottom: 1rem;
+        }
+        .header-gradient {
+            background: linear-gradient(90deg, #1A1A1A 0%, #333333 100%);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+    <header class="header-gradient shadow-lg py-4">
+        <div class="container mx-auto px-4 max-w-6xl">
+            <h1 class="text-3xl font-extrabold text-white">Advocates For Change (AFC)</h1>
+        </div>
+    </header>
+
+    <main class="flex-grow py-16 md:py-24" style="background-color: var(--c-background);">
+        <div class="container mx-auto px-4 max-w-5xl">
+
+            <section class="mb-16 text-center">
+                <span class="inline-block text-lg font-bold uppercase tracking-widest" style="color: var(--c-primary);">Welcome</span>
+                <h2 class="text-6xl md:text-7xl font-extrabold mb-4" style="color: var(--c-primary-dark);">Project U: Access Portal</h2>
+                <p class="text-xl text-gray-700 max-w-3xl mx-auto">
+                    The Unshakeable Competence Framework is driven by data and specialized outreach. Select your role to access customized information, training resources, or partnership tools.
+                </p>
+            </section>
+
+            <!-- Interactive Portal Links -->
+            <section class="grid grid-cols-1 md:grid-cols-3 gap-10">
+
+                <!-- 1. Student Portal (Links to the Resilience Log) -->
+                <div class="portal-card">
+                    <div class="icon-box" style="background-color: var(--c-accent); color: var(--c-primary-dark);">🧠</div>
+                    <h3 class="text-2xl font-bold mb-3" style="color: var(--c-primary);">Student Portal</h3>
+                    <p class="text-gray-600 mb-8">
+                        Access the Resilience Log (interactive journal) and specialized somatic grounding exercises. This is your tool for self-mastery.
+                    </p>
+                    <a href="student-portal.html" class="portal-link">Launch Resilience Log</a>
+                </div>
+
+                <!-- 2. Parent Portal (Links to the Parent Presentation Webpage) -->
+                <div class="portal-card">
+                    <div class="icon-box" style="background-color: var(--c-primary-dark); color: var(--c-accent);">🏡</div>
+                    <h3 class="text-2xl font-bold mb-3" style="color: var(--c-primary);">Parent Portal</h3>
+                    <p class="text-gray-600 mb-8">
+                        View program benefits, communication guides for conflict resolution at home, and schedules for Parent Wellness Workshops.
+                    </p>
+                    <a href="parent-portal.html" class="portal-link" style="background-color: var(--c-primary); color: white;">View Resources</a>
+                </div>
+
+                <!-- 3. Partner Portal (Links to the Executive Presentation/Impact Dashboard) -->
+                <div class="portal-card">
+                    <div class="icon-box" style="background-color: var(--c-accent); color: var(--c-primary-dark);">📈</div>
+                    <h3 class="text-2xl font-bold mb-3" style="color: var(--c-primary);">Partner Portal</h3>
+                    <p class="text-gray-600 mb-8">
+                        Access the Impact Dashboard, organizational metrics, and the full Statement of Work (SOW) documents for contracting.
+                    </p>
+                    <a href="partner-portal.html" class="portal-link">View Dashboard</a>
+                </div>
+
+            </section>
+
+        </div>
+    </main>
+
+    <footer class="py-6" style="background-color: var(--c-primary-dark);">
+        <div class="container mx-auto px-4 max-w-6xl text-center">
+            <p class="text-sm" style="color: var(--c-secondary);">Advocates For Change (AFC) | Strategy by Revel Consulting</p>
+        </div>
+    </footer>
+</body>
+</html>
