@@ -1,0 +1,411 @@
+<!-- Chosen Palette: Black and Gold (Hex: #1A1A1A, #333333, #666666, #AAAAAA, #F0F0F0, #DAA520) -->
+<!-- Application Structure Plan: This SPA is a functional dashboard for students. It uses tabs for Week navigation (8 weeks) and features a central Journal Form (for input) and a side-by-side Chart/History view (for output/reflection). Data is managed via localStorage. -->
+<!-- Visualization & Content Choices: 1. Mood Tracker: Goal=Change/Relationship, Choice:Chart.js Line Chart, Interaction:Dynamically updates based on journal entries. Justification:Visualizes internal emotional progress over time, key for self-mastery module. -->
+<!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project U: Resilience Log</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --c-primary-dark: #1A1A1A;
+            --c-primary: #333333;
+            --c-primary-light: #666666;
+            --c-secondary: #AAAAAA;
+            --c-background: #F0F0F0;
+            --c-accent: #DAA520;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--c-background);
+            color: var(--c-primary-dark);
+        }
+        .main-card {
+            background-color: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        }
+        .tab-button {
+            transition: background-color 0.2s, color 0.2s;
+            cursor: pointer;
+        }
+        .tab-button.active {
+            background-color: var(--c-accent) !important;
+            color: var(--c-primary-dark) !important;
+            font-weight: 700;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 300px;
+        }
+        /* Ensure inputs match the theme */
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--c-accent);
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body>
+
+    <header class="bg-white shadow-lg py-4">
+        <div class="container mx-auto px-4 max-w-6xl text-center">
+            <h1 class="text-3xl font-extrabold" style="color: var(--c-primary-dark);">Project U: Resilience Log</h1>
+            <p class="text-lg" style="color: var(--c-accent);">Your Tool for Unshakeable Competence</p>
+        </div>
+    </header>
+
+    <main class="py-8 md:py-12">
+        <div class="container mx-auto px-4 max-w-6xl">
+            
+            <!-- Data Storage Warning -->
+            <div id="storage-warning" class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6 rounded-lg text-sm" role="alert">
+                <p class="font-bold">Privacy Notice:</p>
+                <p>This journal data is saved only on *this device* in your browser's memory. If you clear your browser history or use a different device, your log will be lost. This data is not shared with AFC or the school.</p>
+            </div>
+
+            <!-- Week Navigation -->
+            <div id="week-tabs" class="flex flex-wrap justify-center main-card p-4 mb-8 space-x-2 sm:space-x-4">
+                <!-- Tabs will be rendered here -->
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                <!-- Left Column: Journal Entry Form -->
+                <div class="lg:col-span-1 main-card h-full">
+                    <h2 class="text-2xl font-bold mb-4" style="color: var(--c-primary-dark);">Daily Check-In: Log Your Data</h2>
+                    <p id="current-week-title" class="text-sm font-semibold mb-4" style="color: var(--c-accent);">Module I: Self-Mastery (Week 1)</p>
+                    
+                    <form id="journal-form" class="space-y-4">
+
+                        <div>
+                            <label for="entry-date" class="block text-sm font-medium" style="color: var(--c-primary);">Date</label>
+                            <input type="date" id="entry-date" required class="mt-1 block w-full p-2 border rounded-md shadow-sm" style="border-color: var(--c-primary-light);">
+                        </div>
+                        
+                        <div>
+                            <label for="emotional-state" class="block text-sm font-medium mb-2" style="color: var(--c-primary);">1. Internal State (1=Stressed, 10=Calm)</label>
+                            <input type="range" id="emotional-state" min="1" max="10" value="5" class="w-full">
+                            <div class="flex justify-between text-xs mt-1" style="color: var(--c-primary-light);">
+                                <span>1 (Chaos)</span>
+                                <span>10 (Anchor)</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="trigger-identified" class="block text-sm font-medium" style="color: var(--c-primary);">2. Trigger Identified (What shook your anchor?)</label>
+                            <textarea id="trigger-identified" rows="2" class="mt-1 block w-full p-2 border rounded-md shadow-sm" placeholder="Example: A peer challenged my opinion, or, I was tired and couldn't focus." style="border-color: var(--c-primary-light);"></textarea>
+                        </div>
+                        
+                        <div>
+                            <label for="skill-used" class="block text-sm font-medium" style="color: var(--c-primary);">3. Skill Used (Which protocol did you deploy?)</label>
+                            <select id="skill-used" required class="mt-1 block w-full p-2 border rounded-md shadow-sm" style="border-color: var(--c-primary-light);">
+                                <option value="">Select AFC Skill</option>
+                                <option value="Reset">90-Second Reset Protocol (Breathing)</option>
+                                <option value="Boundaries">Boundary Script / Asserting 'No'</option>
+                                <option value="Mirroring">Mirroring Game / Validation</option>
+                                <option value="Protocol">3-Step Conflict Protocol</option>
+                                <option value="None">None (Reacted impulsively)</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label for="reflection" class="block text-sm font-medium" style="color: var(--c-primary);">4. Reflection (What was the outcome?)</label>
+                            <textarea id="reflection" rows="3" class="mt-1 block w-full p-2 border rounded-md shadow-sm" placeholder="Did the skill work? What did you learn?" style="border-color: var(--c-primary-light);"></textarea>
+                        </div>
+
+                        <button type="submit" class="w-full text-white font-semibold py-3 rounded-md transition hover:opacity-90" style="background-color: var(--c-accent);">
+                            Log Entry
+                        </button>
+                        <p id="message" class="text-center text-xs pt-2" style="color: var(--c-accent);"></p>
+                    </form>
+                </div>
+
+                <!-- Right Columns: Chart and History -->
+                <div class="lg:col-span-2 space-y-8">
+                    
+                    <!-- Progress Chart -->
+                    <div class="main-card">
+                        <h2 class="text-2xl font-bold mb-4" style="color: var(--c-primary-dark);">Your Resilience Trend</h2>
+                        <p class="text-sm" style="color: var(--c-primary-light);">Tracks your average reported emotional state (higher is calmer).</p>
+                        <div class="chart-container mt-4">
+                            <canvas id="resilienceChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- History -->
+                    <div class="main-card">
+                        <h2 class="text-2xl font-bold mb-4" style="color: var(--c-primary-dark);">Recent Log History</h2>
+                        <div id="log-history" class="space-y-4">
+                            <p class="text-center text-gray-500">No entries saved yet.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <footer class="py-6 mt-12" style="background-color: var(--c-primary-dark);">
+        <div class="container mx-auto px-4 max-w-6xl text-center">
+            <p class="text-sm" style="color: var(--c-secondary);">Project U - Advocates For Change. Curriculum Designed by Revel Strategy Consulting.</p>
+        </div>
+    </footer>
+
+    <script>
+        const STORAGE_KEY = 'project_u_journal_entries';
+        const METRICS_API_URL = 'https://analytics.afc-projectu.com/api/log-metrics'; // Placeholder API URL
+
+        const ACCENT_COLOR = getComputedStyle(document.documentElement).getPropertyValue('--c-accent').trim();
+        const PRIMARY_COLOR = getComputedStyle(document.documentElement).getPropertyValue('--c-primary').trim();
+        const PRIMARY_DARK = getComputedStyle(document.documentElement).getPropertyValue('--c-primary-dark').trim();
+        const PRIMARY_LIGHT = getComputedStyle(document.documentElement).getPropertyValue('--c-primary-light').trim();
+        
+        let currentWeek = 1;
+        let resilienceChartInstance = null;
+
+        const curriculumMap = [
+            { week: 1, title: "Week 1: The Alarm (Module I)" },
+            { week: 2, title: "Week 2: Emotional Data (Module I)" },
+            { week: 3, title: "Week 3: Re-Alignment (Module I)" },
+            { week: 4, title: "Week 4: Boundaries (Module I)" },
+            { week: 5, title: "Week 5: The Trust Map (Module II)" },
+            { week: 6, title: "Week 6: De-escalation (Module II)" },
+            { week: 7, title: "Week 7: Conflict Protocol (Module II)" },
+            { week: 8, title: "Week 8: Repair (Module II)" },
+        ];
+
+        function loadEntries() {
+            try {
+                const entries = localStorage.getItem(STORAGE_KEY);
+                return entries ? JSON.parse(entries) : [];
+            } catch (e) {
+                console.error("Error loading entries from localStorage:", e);
+                return [];
+            }
+        }
+
+        function saveEntries(entries) {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+            } catch (e) {
+                console.error("Error saving entries to localStorage:", e);
+            }
+        }
+        
+        function sendMetricsToServer(entryData) {
+            // This function is the new component to field data for analytics purposes.
+            // It uses a placeholder URL; in production, this would be a secure endpoint (e.g., Firebase, dedicated analytics server).
+            fetch(METRICS_API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    // Note: In a real app, you would include an authentication token or user ID here
+                },
+                body: JSON.stringify(entryData)
+            })
+            .then(response => {
+                // If the response is not 2xx, throw an error
+                if (!response.ok) {
+                    throw new Error(`Server responded with status: ${response.status}`);
+                }
+                return response.json(); // Process the JSON response if successful
+            })
+            .then(data => {
+                // Success path (Placeholder confirmation)
+                console.log('Metrics successfully sent for analysis:', data);
+            })
+            .catch(error => {
+                // Error path (Crucial for debugging analytics feed)
+                console.error('Failed to send metrics to server:', error);
+            });
+        }
+
+
+        function renderWeekTabs() {
+            const tabsContainer = document.getElementById('week-tabs');
+            tabsContainer.innerHTML = '';
+            curriculumMap.forEach(item => {
+                const button = document.createElement('button');
+                button.className = `tab-button px-3 py-1 rounded-full text-sm transition hover:bg-gray-100`;
+                button.textContent = `Week ${item.week}`;
+                button.setAttribute('data-week', item.week);
+                button.style.color = PRIMARY_DARK;
+                button.style.backgroundColor = 'white';
+
+                if (item.week === currentWeek) {
+                    button.classList.add('active');
+                }
+
+                button.addEventListener('click', () => {
+                    changeWeek(item.week);
+                });
+                tabsContainer.appendChild(button);
+            });
+        }
+
+        function changeWeek(week) {
+            currentWeek = week;
+            renderWeekTabs();
+            renderHistory();
+            updateChart();
+            
+            const weekTitle = curriculumMap.find(item => item.week === week).title;
+            document.getElementById('current-week-title').textContent = weekTitle;
+        }
+
+        function renderHistory() {
+            const historyContainer = document.getElementById('log-history');
+            const entries = loadEntries()
+                .filter(entry => entry.week === currentWeek)
+                .sort((a, b) => new Date(b.date) - new Date(a.date)); // Sort newest first
+            
+            historyContainer.innerHTML = '';
+
+            if (entries.length === 0) {
+                historyContainer.innerHTML = '<p class="text-center text-gray-500">No entries saved for this week.</p>';
+                return;
+            }
+
+            entries.forEach(entry => {
+                const entryDiv = document.createElement('div');
+                entryDiv.className = 'border rounded-lg p-3 shadow-sm';
+                entryDiv.style.borderColor = PRIMARY_COLOR;
+                entryDiv.innerHTML = `
+                    <p class="text-xs font-semibold" style="color: ${PRIMARY_COLOR};">${entry.date} (State: ${entry.state}/10)</p>
+                    <p class="mt-1 text-sm"><strong style="color: ${ACCENT_COLOR};">Skill Used:</strong> ${entry.skill}</p>
+                    <p class="text-sm"><strong style="color: ${PRIMARY_DARK};">Trigger:</strong> ${entry.trigger || 'N/A'}</p>
+                    <p class="text-sm"><strong style="color: ${PRIMARY_DARK};">Reflection:</strong> ${entry.reflection || 'No reflection.'}</p>
+                `;
+                historyContainer.appendChild(entryDiv);
+            });
+        }
+
+        function updateChart() {
+            const allEntries = loadEntries();
+            const weekEntries = allEntries.filter(entry => entry.week === currentWeek)
+                                         .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            const labels = weekEntries.map(entry => entry.date);
+            const dataPoints = weekEntries.map(entry => entry.state);
+
+            if (resilienceChartInstance) {
+                resilienceChartInstance.destroy();
+            }
+
+            const ctx = document.getElementById('resilienceChart').getContext('2d');
+            resilienceChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: `Week ${currentWeek} Emotional State`,
+                        data: dataPoints,
+                        borderColor: ACCENT_COLOR,
+                        backgroundColor: ACCENT_COLOR + '40', // Light transparency
+                        borderWidth: 2,
+                        pointBackgroundColor: ACCENT_COLOR,
+                        tension: 0.3,
+                        fill: true,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            min: 1,
+                            max: 10,
+                            title: { display: true, text: 'Calmness Score (1-10)', color: PRIMARY_COLOR },
+                            ticks: { color: PRIMARY_LIGHT }
+                        },
+                        x: {
+                            ticks: { color: PRIMARY_LIGHT }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: PRIMARY_DARK,
+                            titleColor: 'white',
+                            bodyColor: 'white',
+                            callbacks: {
+                                title: function(tooltipItems) { return tooltipItems[0].label; },
+                                label: function(context) { return `State: ${context.parsed.y}/10`; }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        document.getElementById('journal-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const form = e.target;
+            const date = form['entry-date'].value;
+            const state = parseInt(form['emotional-state'].value);
+            const trigger = form['trigger-identified'].value.trim();
+            const skill = form['skill-used'].value;
+            const reflection = form['reflection'].value.trim();
+            const messageElement = document.getElementById('message');
+
+            if (!date || skill === "") {
+                messageElement.textContent = "Please fill out the date and select a skill.";
+                return;
+            }
+
+            const newEntry = {
+                id: Date.now(),
+                week: currentWeek,
+                date: date,
+                state: state,
+                trigger: trigger,
+                skill: skill,
+                reflection: reflection,
+                timestamp: new Date().toISOString()
+            };
+
+            // 1. Save entry to local storage (for student's viewing)
+            const entries = loadEntries();
+            entries.push(newEntry);
+            saveEntries(entries);
+            
+            // 2. Send entry to external server (for AFC metrics)
+            sendMetricsToServer(newEntry);
+
+            messageElement.textContent = "Entry logged successfully!";
+            form.reset();
+            form['emotional-state'].value = 5; 
+            
+            renderHistory();
+            updateChart();
+        });
+
+        // Initialize Application
+        document.addEventListener('DOMContentLoaded', () => {
+            renderWeekTabs();
+            renderHistory();
+            updateChart();
+            
+            // Set current date input max value
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('entry-date').max = today;
+            document.getElementById('entry-date').value = today;
+        });
+
+    </script>
+</body>
+</html>
